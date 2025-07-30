@@ -1,7 +1,11 @@
 // Unsplash service for fetching relevant images
 export interface UnsplashImage {
   id: string;
-  url: string;
+  urls: {
+    regular: string;
+    small: string;
+    thumb: string;
+  };
   description: string;
   alt_description: string;
   width: number;
@@ -35,7 +39,11 @@ export class UnsplashService {
       
       return data.results.map((photo: any) => ({
         id: photo.id,
-        url: photo.urls.regular,
+        urls: {
+          regular: photo.urls.regular,
+          small: photo.urls.small,
+          thumb: photo.urls.thumb,
+        },
         description: photo.description || photo.alt_description || '',
         alt_description: photo.alt_description || '',
         width: photo.width,
@@ -68,7 +76,11 @@ export class UnsplashService {
       
       return photos.map((photo: any) => ({
         id: photo.id,
-        url: photo.urls.regular,
+        urls: {
+          regular: photo.urls.regular,
+          small: photo.urls.small,
+          thumb: photo.urls.thumb,
+        },
         description: photo.description || photo.alt_description || '',
         alt_description: photo.alt_description || '',
         width: photo.width,
@@ -118,5 +130,88 @@ export class UnsplashService {
     }
     
     return terms.slice(0, 3); // Return top 3 terms
+  }
+  
+  // Inject images into HTML content
+  injectImagesIntoHTML(htmlContent: string, images: UnsplashImage[]): string {
+    if (images.length === 0) return htmlContent;
+    
+    let modifiedHTML = htmlContent;
+    
+    // Try to inject hero image
+    if (images[0]) {
+      const heroImageUrl = `${images[0].urls.regular}&w=1200&h=600&fit=crop`;
+      
+      // Look for existing hero sections or main content areas
+      const heroPatterns = [
+        /<div[^>]*class="[^"]*hero[^"]*"[^>]*>/gi,
+        /<section[^>]*class="[^"]*hero[^"]*"[^>]*>/gi,
+        /<div[^>]*class="[^"]*banner[^"]*"[^>]*>/gi,
+        /<header[^>]*>/gi
+      ];
+      
+      let heroInjected = false;
+      for (const pattern of heroPatterns) {
+        if (pattern.test(modifiedHTML) && !heroInjected) {
+          modifiedHTML = modifiedHTML.replace(pattern, (match) => {
+            heroInjected = true;
+            return `${match}
+          <div style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${heroImageUrl}'); background-size: cover; background-position: center; min-height: 400px; display: flex; align-items: center; justify-content: center;">`;
+          });
+          
+          // Close the background div after the next closing div
+          let divsClosed = 0;
+          modifiedHTML = modifiedHTML.replace(/<\/div>/g, (match) => {
+            if (heroInjected && divsClosed === 0) {
+              divsClosed++;
+              return '</div></div>';
+            }
+            return match;
+          });
+        }
+      }
+      
+      // If no hero section found, inject at the top of body
+      if (!heroInjected) {
+        modifiedHTML = modifiedHTML.replace(/<body[^>]*>/i, (match) => {
+          return `${match}
+        <div style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${heroImageUrl}'); background-size: cover; background-position: center; min-height: 300px; display: flex; align-items: center; justify-content: center; color: white; text-align: center;">
+          <div style="max-width: 800px; padding: 40px 20px;">
+            <h1 style="font-size: 3rem; margin-bottom: 20px; font-weight: bold;">Welcome</h1>
+            <p style="font-size: 1.2rem; opacity: 0.9;">Discover amazing possibilities</p>
+          </div>
+        </div>`;
+        });
+      }
+    }
+    
+    // Inject additional images into gallery or content sections
+    if (images.length > 1) {
+      const additionalImages = images.slice(1, 4); // Use up to 3 more images
+      
+      // Look for image placeholders or content sections
+      additionalImages.forEach((image, index) => {
+        const imageUrl = `${image.urls.regular}&w=800&h=400&fit=crop`;
+        const patterns = [
+          /<img[^>]*src="[^"]*placeholder[^"]*"[^>]*>/gi,
+          /<div[^>]*class="[^"]*gallery[^"]*"[^>]*>/gi,
+          /<div[^>]*class="[^"]*features[^"]*"[^>]*>/gi,
+          /<div[^>]*class="[^"]*content[^"]*"[^>]*>/gi
+        ];
+        
+        if (patterns[index] && patterns[index].test(modifiedHTML)) {
+          modifiedHTML = modifiedHTML.replace(patterns[index], (match) => {
+            if (match.includes('<img')) {
+              return `<img src="${imageUrl}" alt="${image.alt_description || 'Featured image'}" style="width: 100%; height: auto; border-radius: 8px;">`;
+            } else {
+              return `${match}
+            <img src="${imageUrl}" alt="${image.alt_description || 'Featured image'}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin: 20px 0;">`;
+            }
+          });
+        }
+      });
+    }
+    
+    return modifiedHTML;
   }
 }

@@ -104,25 +104,47 @@ const ChatInterface = ({
       // Generate app content
       const result = await aiService.generateApp(prompt, imageBase64);
       
-      // Parse files from the response content
+      // Parse files from the response content with better handling
       let files = result.files || [];
       let cleanDescription = result.content;
       
-      // Additional parsing in case the AI service parsing didn't catch everything
+      // Enhanced parsing for different file formats
       if (files.length === 0) {
-        const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
-        let match;
+        // Look for different file patterns
+        const patterns = [
+          /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g,
+          /###\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g,
+          /##\s*FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g,
+          /#\s*([^\n]+\.(?:html|css|js|jsx|ts|tsx))\n```(\w+)?\n([\s\S]*?)```/g
+        ];
         
-        while ((match = fileRegex.exec(result.content)) !== null) {
-          const [fullMatch, path, language = 'text', fileContent] = match;
-          files.push({
-            path: path.trim(),
-            content: fileContent.trim(),
-            language: language.toLowerCase()
-          });
-          // Remove the file block from the description
-          cleanDescription = cleanDescription.replace(fullMatch, '');
-        }
+        patterns.forEach(pattern => {
+          let match;
+          while ((match = pattern.exec(result.content)) !== null) {
+            const [fullMatch, path, language, fileContent] = match;
+            
+            // Detect file type from extension if language not specified
+            let detectedLang = language;
+            if (!detectedLang) {
+              const ext = path.split('.').pop()?.toLowerCase();
+              detectedLang = ext === 'js' ? 'javascript' :
+                            ext === 'jsx' ? 'javascript' :
+                            ext === 'ts' ? 'typescript' :
+                            ext === 'tsx' ? 'typescript' :
+                            ext === 'css' ? 'css' :
+                            ext === 'html' ? 'html' : 'text';
+            }
+            
+            files.push({
+              path: path.trim(),
+              content: fileContent.trim(),
+              language: detectedLang.toLowerCase()
+            });
+            
+            // Remove the file block from the description
+            cleanDescription = cleanDescription.replace(fullMatch, '');
+          }
+        });
       }
       
       // If still no files generated, create a basic template
@@ -186,14 +208,24 @@ const ChatInterface = ({
         }];
       }
 
-      // Try to fetch relevant images from Unsplash
+      // Try to fetch relevant images from Unsplash and inject them
       try {
         const searchTerms = unsplashService.generateSearchTerms(prompt);
         const images = await unsplashService.searchImages(searchTerms[0], 3);
         
         if (images.length > 0) {
-          // You could inject images into the generated HTML here
-          console.log("Found relevant images:", images);
+          // Inject images into HTML files
+          files = files.map(file => {
+            if (file.language === 'html') {
+              return {
+                ...file,
+                content: unsplashService.injectImagesIntoHTML(file.content, images)
+              };
+            }
+            return file;
+          });
+          
+          console.log("Successfully injected relevant images:", images.map(img => img.alt_description));
         }
       } catch (error) {
         console.warn("Failed to fetch images from Unsplash:", error);
