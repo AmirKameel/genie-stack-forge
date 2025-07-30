@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'title': ['Source Sans Pro', 'sans-serif'],
+				'body': ['IBM Plex Sans', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -26,7 +30,13 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					hover: 'hsl(var(--primary-hover))',
+				},
+				orange: {
+					DEFAULT: 'hsl(var(--orange))',
+					foreground: 'hsl(var(--orange-foreground))',
+					hover: 'hsl(var(--orange-hover))',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',

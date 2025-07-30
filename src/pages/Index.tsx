@@ -1,13 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import LandingPage from "@/components/LandingPage";
+import AppGenerator from "@/components/AppGenerator";
 
 const Index = () => {
+  const [currentView, setCurrentView] = useState<"landing" | "generator">("landing");
+  const [generationData, setGenerationData] = useState<{
+    prompt: string;
+    image?: File;
+  } | null>(null);
+
+  const handleStartGeneration = (prompt: string, image?: File) => {
+    setGenerationData({ prompt, image });
+    setCurrentView("generator");
+  };
+
+  const handleBackToLanding = () => {
+    setCurrentView("landing");
+    setGenerationData(null);
+  };
+
+  if (currentView === "generator" && generationData) {
+    return (
+      <AppGenerator
+        initialPrompt={generationData.prompt}
+        initialImage={generationData.image}
+        onBack={handleBackToLanding}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <LandingPage onStartGeneration={handleStartGeneration} />
   );
 };
 
