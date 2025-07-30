@@ -102,11 +102,30 @@ const ChatInterface = ({
       const unsplashService = new UnsplashService("LJRrYs6fCK-tsxV_Xx6azh4UWidQVlEQsmpnRkQqrgg");
 
       // Generate app content
-      const aiResponse = await aiService.generateApp(prompt, imageBase64);
+      const result = await aiService.generateApp(prompt, imageBase64);
       
-      let files = aiResponse.files || [];
+      // Parse files from the response content
+      let files = result.files || [];
+      let cleanDescription = result.content;
       
-      // If no files generated, create a basic template
+      // Additional parsing in case the AI service parsing didn't catch everything
+      if (files.length === 0) {
+        const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
+        let match;
+        
+        while ((match = fileRegex.exec(result.content)) !== null) {
+          const [fullMatch, path, language = 'text', fileContent] = match;
+          files.push({
+            path: path.trim(),
+            content: fileContent.trim(),
+            language: language.toLowerCase()
+          });
+          // Remove the file block from the description
+          cleanDescription = cleanDescription.replace(fullMatch, '');
+        }
+      }
+      
+      // If still no files generated, create a basic template
       if (files.length === 0) {
         files = [{
           path: "index.html",
@@ -183,7 +202,7 @@ const ChatInterface = ({
       const assistantMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: aiResponse.content || `I've generated your app based on your request! Here's what I created:
+        content: cleanDescription.trim() || `I've generated your app based on your request! Here's what I created:
 
 ${files.map(f => `- **${f.path}**: ${f.language.toUpperCase()} file`).join('\n')}
 
