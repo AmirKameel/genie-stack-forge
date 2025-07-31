@@ -365,7 +365,96 @@ You can now view the live preview or edit the code. Ask me to make any changes y
     const messageToProcess = currentMessage;
     setCurrentMessage("");
 
-    await generateResponse(messageToProcess);
+    // Check if this is an edit request and we have existing files
+    if (appState.files.length > 0 && isEditRequest(messageToProcess)) {
+      await handleEditRequest(messageToProcess);
+    } else {
+      await generateResponse(messageToProcess);
+    }
+  };
+  
+  const isEditRequest = (message: string): boolean => {
+    const editKeywords = ['edit', 'change', 'modify', 'update', 'fix', 'adjust', 'add to', 'remove from'];
+    return editKeywords.some(keyword => message.toLowerCase().includes(keyword));
+  };
+  
+  const handleEditRequest = async (editPrompt: string) => {
+    setIsGenerating(true);
+    setAppState(prev => ({ ...prev, isGenerating: true }));
+    
+    try {
+      const aiService = new AIService(
+        "AIzaSyCdN7JK1hpDaziMTfqY8V6GcYq00ufd-UI",
+        model,
+        provider
+      );
+      
+      // Create a context about current files for editing
+      const filesContext = appState.files.map(f => `${f.path}:\n${f.content}`).join('\n\n---\n\n');
+      const editPromptWithContext = `You are editing an existing web application. Here are the current files:
+
+${filesContext}
+
+USER REQUEST: ${editPrompt}
+
+IMPORTANT: Only return the MODIFIED files that need changes. Do not regenerate unchanged files. Use the same FILE: format.`;
+
+      const result = await aiService.generateApp(editPromptWithContext);
+      
+      // Parse the edited files
+      let editedFiles: GeneratedFile[] = [];
+      const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
+      let match;
+      
+      while ((match = fileRegex.exec(result.content)) !== null) {
+        const [, path, language = 'text', fileContent] = match;
+        editedFiles.push({
+          path: path.trim(),
+          content: fileContent.trim(),
+          language: language.toLowerCase()
+        });
+      }
+      
+      // Update existing files with edits
+      if (editedFiles.length > 0) {
+        setAppState(prev => ({
+          ...prev,
+          files: prev.files.map(existingFile => {
+            const editedFile = editedFiles.find(ef => ef.path === existingFile.path);
+            return editedFile || existingFile;
+          })
+        }));
+        
+        const assistantMessage: Message = {
+          id: Date.now().toString(),
+          role: "assistant",
+          content: `I've updated the following files based on your request:
+
+${editedFiles.map(f => `- **${f.path}**: Modified`).join('\n')}
+
+The changes have been applied to your existing app. You can see the updates in the live preview!`,
+          timestamp: new Date(),
+          files: editedFiles
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        throw new Error("No files were generated for the edit request");
+      }
+      
+    } catch (error) {
+      console.error("Edit error:", error);
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "I had trouble processing your edit request. Could you be more specific about what you'd like to change?",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsGenerating(false);
+      setAppState(prev => ({ ...prev, isGenerating: false }));
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

@@ -137,12 +137,12 @@ Generate a complete, functional web application for: ${prompt}`;
   private parseResponse(content: string): AIResponse {
     const files: Array<{ path: string; content: string; language: string }> = [];
     
-    // Parse files from the response
-    const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
+    // Enhanced regex to catch all file formats
+    const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
     let match;
     
     while ((match = fileRegex.exec(content)) !== null) {
-      const [, path, language = 'text', fileContent] = match;
+      const [fullMatch, path, language = 'text', fileContent] = match;
       files.push({
         path: path.trim(),
         content: fileContent.trim(),
@@ -150,8 +150,20 @@ Generate a complete, functional web application for: ${prompt}`;
       });
     }
     
-    // Remove file blocks from content to get the description
-    const description = content.replace(fileRegex, '').trim();
+    // Remove ALL file blocks and code blocks from content to get clean description
+    let description = content
+      .replace(/FILE:\s*[^\n\r]+[\n\r]+```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove FILE blocks
+      .replace(/```[\s\S]*?```/g, '') // Remove any remaining code blocks
+      .replace(/^\s*[\n\r]+/gm, '') // Remove empty lines at start
+      .replace(/[\n\r]{3,}/g, '\n\n') // Reduce multiple newlines
+      .trim();
+    
+    // If description is too short or mostly technical, provide a better one
+    if (description.length < 50 || description.match(/^(Generated Files?:?|Here|The)/i)) {
+      description = files.length > 0 
+        ? `I've generated ${files.length} file${files.length > 1 ? 's' : ''} for your application with all the requested features and styling.`
+        : '';
+    }
     
     return {
       content: description,
