@@ -35,21 +35,47 @@ export class AIService {
   private async generateWithGemini(prompt: string, imageBase64?: string): Promise<AIResponse> {
     const systemPrompt = `You are WebMeccano, an expert full-stack web developer. Generate complete, production-ready web applications based on user requirements.
 
-IMPORTANT GUIDELINES:
+CRITICAL INSTRUCTIONS FOR FILE GENERATION:
+1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
+2. NEVER include code in the description - ALL CODE must be in separate files
+3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
+4. Always create separate CSS files for styling, never inline styles in HTML (except for critical styles)
+5. Create separate JavaScript files for functionality when needed
+
+IMPORTANT DESIGN GUIDELINES:
 1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
 2. Use fonts: 'Source Sans Pro' for headings, 'IBM Plex Sans' for body text
-3. Create responsive, modern designs
-4. Generate multiple files (HTML, CSS, JS) when needed
-5. Include interactive elements and functionality
-6. Make apps visually appealing and professional
+3. Create responsive, modern designs with proper CSS styling
+4. Include interactive elements and functionality
+5. Make apps visually appealing and professional
+6. Use modern CSS features like flexbox, grid, and animations
 
-Response format:
-- Provide a brief description of what you built
-- Then provide file contents in this format:
+REQUIRED RESPONSE FORMAT:
+1. Start with a brief description of what you built (no code)
+2. Then generate ALL files using this EXACT format:
 
 FILE: filename.ext
 \`\`\`language
 file content here
+\`\`\`
+
+EXAMPLE:
+FILE: index.html
+\`\`\`html
+<!DOCTYPE html>
+<html>...
+\`\`\`
+
+FILE: style.css
+\`\`\`css
+body { ... }
+\`\`\`
+
+FILE: script.js
+\`\`\`javascript
+document.addEventListener('DOMContentLoaded', function() {
+  // functionality here
+});
 \`\`\`
 
 Generate a complete, functional web application for: ${prompt}`;

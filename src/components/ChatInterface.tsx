@@ -108,22 +108,35 @@ const ChatInterface = ({
       let files = result.files || [];
       let cleanDescription = result.content;
       
-      // Additional parsing in case the AI service parsing didn't catch everything
-      if (files.length === 0) {
-        const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
-        let match;
-        
-        while ((match = fileRegex.exec(result.content)) !== null) {
-          const [fullMatch, path, language = 'text', fileContent] = match;
-          files.push({
-            path: path.trim(),
-            content: fileContent.trim(),
-            language: language.toLowerCase()
-          });
-          // Remove the file block from the description
-          cleanDescription = cleanDescription.replace(fullMatch, '');
-        }
+      // Enhanced parsing to catch all file formats and clean description
+      const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
+      let match;
+      const parsedFiles: GeneratedFile[] = [];
+      
+      while ((match = fileRegex.exec(result.content)) !== null) {
+        const [fullMatch, path, language = 'text', fileContent] = match;
+        parsedFiles.push({
+          path: path.trim(),
+          content: fileContent.trim(),
+          language: language.toLowerCase()
+        });
+        // Remove the file block from the description
+        cleanDescription = cleanDescription.replace(fullMatch, '');
       }
+      
+      // Use parsed files if we found any, otherwise use files from AI service
+      if (parsedFiles.length > 0) {
+        files = parsedFiles;
+      } else if (result.files) {
+        files = result.files;
+      }
+      
+      // Clean up any remaining code blocks or file references from description
+      cleanDescription = cleanDescription
+        .replace(/```[\s\S]*?```/g, '') // Remove any remaining code blocks
+        .replace(/FILE:\s*[^\n]+/g, '') // Remove any FILE: markers
+        .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove excessive newlines
+        .trim();
       
       // If still no files generated, create a basic template
       if (files.length === 0) {
@@ -186,14 +199,59 @@ const ChatInterface = ({
         }];
       }
 
-      // Try to fetch relevant images from Unsplash
+      // Try to fetch relevant images from Unsplash and inject them
       try {
         const searchTerms = unsplashService.generateSearchTerms(prompt);
-        const images = await unsplashService.searchImages(searchTerms[0], 3);
+        const images = await unsplashService.searchImages(searchTerms[0], 6);
         
         if (images.length > 0) {
-          // You could inject images into the generated HTML here
-          console.log("Found relevant images:", images);
+          // Inject images into HTML files
+          files = files.map(file => {
+            if (file.path.endsWith('.html') && file.content.includes('<body')) {
+              let updatedContent = file.content;
+              
+              // Replace placeholder image URLs with Unsplash images
+              const placeholderPatterns = [
+                /https:\/\/via\.placeholder\.com\/[\d]+x?[\d]*[^"']*/g,
+                /https:\/\/images\.unsplash\.com\/[^"']*/g,
+                /placeholder\.(jpg|jpeg|png|gif)/gi,
+                /image\d*\.(jpg|jpeg|png|gif)/gi
+              ];
+              
+              let imageIndex = 0;
+              placeholderPatterns.forEach(pattern => {
+                updatedContent = updatedContent.replace(pattern, () => {
+                  if (imageIndex < images.length) {
+                    return images[imageIndex++ % images.length].url;
+                  }
+                  return images[0].url;
+                });
+              });
+              
+              // If no placeholders found, try to inject images into common patterns
+              if (updatedContent === file.content && images.length > 0) {
+                // Add hero background image
+                updatedContent = updatedContent.replace(
+                  /(background[^;]*:\s*)(url\([^)]*\)|[^;]*)(;|$)/gi,
+                  `$1url('${images[0].url}')$3`
+                );
+                
+                // Replace generic image sources
+                updatedContent = updatedContent.replace(
+                  /<img[^>]+src=["'][^"']*["']/gi,
+                  (match) => {
+                    if (imageIndex < images.length) {
+                      return match.replace(/src=["'][^"']*["']/, `src="${images[imageIndex++ % images.length].url}"`);
+                    }
+                    return match;
+                  }
+                );
+              }
+              
+              return { ...file, content: updatedContent };
+            }
+            return file;
+          });
         }
       } catch (error) {
         console.warn("Failed to fetch images from Unsplash:", error);
@@ -202,17 +260,19 @@ const ChatInterface = ({
       const assistantMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: cleanDescription.trim() || `I've generated your app based on your request! Here's what I created:
+        content: cleanDescription || `I've generated your app based on your request! 
 
+**Generated Files:**
 ${files.map(f => `- **${f.path}**: ${f.language.toUpperCase()} file`).join('\n')}
 
-The app includes:
+**Features included:**
 - Responsive design with WebMeccano branding
-- Professional typography using Source Sans Pro and IBM Plex Sans
+- Professional typography using Source Sans Pro and IBM Plex Sans  
 - WebMeccano color scheme (#34bfc2 blue and #F78D2B orange)
 - Interactive elements and modern styling
+- Proper separation of HTML, CSS, and JavaScript
 
-You can now edit the code or ask me to make changes!`,
+You can now view the live preview or edit the code. Ask me to make any changes you'd like!`,
         timestamp: new Date(),
         files
       };

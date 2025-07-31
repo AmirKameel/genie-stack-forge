@@ -41,18 +41,23 @@ const AppGenerator = ({ initialPrompt, initialImage, onBack }: AppGeneratorProps
 
   const [selectedProvider, setSelectedProvider] = useState<"gemini" | "openai" | "claude">("gemini");
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-pro");
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState("preview");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const handleFileGenerated = (files: GeneratedFile[]) => {
     setAppState(prev => ({
       ...prev,
-      files: [...prev.files, ...files],
+      files: files, // Replace all files with new generation
     }));
     
     // Auto-select the first file if none selected
     if (!selectedFile && files.length > 0) {
       setSelectedFile(files[0].path);
+    }
+    
+    // Switch to preview after generation
+    if (files.length > 0) {
+      setActiveTab("preview");
     }
   };
 
@@ -152,12 +157,16 @@ const AppGenerator = ({ initialPrompt, initialImage, onBack }: AppGeneratorProps
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
             <div className="border-b px-4 py-0">
               <TabsList className="font-body">
-                <TabsTrigger value="chat" className="font-body">Code Editor</TabsTrigger>
                 <TabsTrigger value="preview" className="font-body">Live Preview</TabsTrigger>
+                <TabsTrigger value="code" className="font-body">Code Editor</TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="chat" className="flex-1 flex flex-col m-0">
+            <TabsContent value="preview" className="flex-1 m-0">
+              <LivePreview files={appState.files} />
+            </TabsContent>
+
+            <TabsContent value="code" className="flex-1 flex flex-col m-0">
               <div className="flex-1 flex">
                 {/* File Explorer */}
                 <div className="w-64 border-r bg-muted/30">
@@ -204,9 +213,6 @@ const AppGenerator = ({ initialPrompt, initialImage, onBack }: AppGeneratorProps
               </div>
             </TabsContent>
 
-            <TabsContent value="preview" className="flex-1 m-0">
-              <LivePreview files={appState.files} />
-            </TabsContent>
           </Tabs>
         </div>
       </div>
