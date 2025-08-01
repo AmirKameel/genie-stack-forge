@@ -37,16 +37,14 @@ export class AIService {
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
-2. MANDATORY: Create at least one CSS file (style.css or styles.css) for ALL styling
-3. NEVER include ANY code in the description - ALL CODE must be in separate files using the FILE format
-4. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
-5. Always create separate CSS files for styling, never inline styles in HTML
-6. Create separate JavaScript files for functionality when needed
-7. For multi-page websites, create ALL necessary files including shared CSS files
-8. NEVER put CSS code in the chat response - it must be in separate .css files
-9. NEVER include any code snippets, CSS rules, or technical syntax in your description
-10. Keep your description brief and non-technical - just explain what you built
-11. MANDATORY: Every website MUST have at least one .css file with complete styling
+2. NEVER include ANY code in the description - ALL CODE must be in separate files using the FILE format
+3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
+4. Always create separate CSS files for styling, never inline styles in HTML (except for critical styles)
+5. Create separate JavaScript files for functionality when needed
+6. For multi-page websites, create ALL necessary files including shared CSS files
+7. NEVER put CSS code in the chat response - it must be in separate .css files
+8. NEVER include any code snippets, CSS rules, or technical syntax in your description
+9. Keep your description brief and non-technical - just explain what you built
 
 IMPORTANT DESIGN GUIDELINES:
 1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
@@ -70,8 +68,6 @@ CRITICAL:
 - Do not include any code outside of FILE blocks
 - Do not include CSS rules, selectors, or any technical syntax in your description
 - Keep description simple and user-friendly
-- MANDATORY: Always generate at least one CSS file with complete styling
-- For multi-page sites, create a shared CSS file that all pages link to
 
 EXAMPLE:
 Description: I've created a modern website with multiple pages and professional styling.
@@ -79,18 +75,12 @@ Description: I've created a modern website with multiple pages and professional 
 FILE: index.html
 \`\`\`html
 <!DOCTYPE html>
-<html>
-<head>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>...</body>
-</html>
+<html>...
 \`\`\`
 
-FILE: styles.css
+FILE: style.css
 \`\`\`css
 body { ... }
-/* Complete styling here */
 \`\`\`
 
 FILE: script.js
@@ -186,11 +176,6 @@ Generate a complete, functional web application for: ${prompt}`;
       .replace(/\/\*[\s\S]*?\*\//g, '') // Remove CSS comments
       .replace(/\{[\s\S]*?\}/g, '') // Remove CSS rule blocks
       .replace(/[.#][\w-]+[\s\S]*?(?=\n|$)/g, '') // Remove CSS selectors
-      .replace(/--[\w-]+:\s*[^;]+;/g, '') // Remove CSS variables
-      .replace(/:root\s*\{[\s\S]*?\}/g, '') // Remove :root blocks
-      .replace(/\*\s*\{[\s\S]*?\}/g, '') // Remove universal selector blocks
-      .replace(/html\s*\{[\s\S]*?\}/g, '') // Remove html selector blocks
-      .replace(/body\s*\{[\s\S]*?\}/g, '') // Remove body selector blocks
       .trim();
     
     // If description is too short, mostly technical, or contains code remnants, provide a better one
@@ -198,12 +183,6 @@ Generate a complete, functional web application for: ${prompt}`;
       description = files.length > 0 
         ? `I've created a complete application with ${files.length} file${files.length > 1 ? 's' : ''} including all the requested features and professional styling.`
         : 'Application generated successfully.';
-    }
-    
-    // Ensure we have at least one CSS file for styling
-    const hasCssFile = files.some(file => file.path.endsWith('.css'));
-    if (!hasCssFile && files.length > 0) {
-      console.warn('No CSS file detected in generated files. This may cause styling issues.');
     }
     
     return {

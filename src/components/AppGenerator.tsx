@@ -96,6 +96,15 @@ const AppGenerator = ({ initialPrompt, initialImage, onBack }: AppGeneratorProps
             <div className="h-6 w-px bg-border" />
             
             <WebMeccanoLogo className="h-8" />
+            
+            {appState.currentProject && (
+              <>
+                <div className="h-6 w-px bg-border" />
+                <div>
+                  <h1 className="font-title font-semibold">{appState.currentProject.name}</h1>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
