@@ -41,15 +41,6 @@ CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 4. Always create separate CSS files for styling, never inline styles in HTML (except for critical styles)
 5. Create separate JavaScript files for functionality when needed
-6. ALWAYS include REAL, MEANINGFUL CONTENT - not just placeholder text
-7. Fill sections with actual relevant content based on the business/app type
-
-IMPORTANT CONTENT GUIDELINES:
-1. Generate realistic, professional content for all sections
-2. Include actual company descriptions, service details, team information
-3. Use compelling headlines and engaging copy
-4. Add realistic testimonials, feature descriptions, and business information
-5. Never leave sections empty or with just "Lorem ipsum" text
 
 IMPORTANT DESIGN GUIDELINES:
 1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
@@ -146,7 +137,7 @@ Generate a complete, functional web application for: ${prompt}`;
   private parseResponse(content: string): AIResponse {
     const files: Array<{ path: string; content: string; language: string }> = [];
     
-    // Enhanced regex to catch all file formats including edge cases
+    // Enhanced regex to catch all file formats
     const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
     let match;
     
@@ -159,33 +150,10 @@ Generate a complete, functional web application for: ${prompt}`;
       });
     }
     
-    // Also try to catch code blocks without FILE: markers (fallback parsing)
-    if (files.length === 0) {
-      const codeBlockRegex = /```(\w+)[\n\r]+([\s\S]*?)```/g;
-      let codeMatch;
-      let fileIndex = 0;
-      
-      while ((codeMatch = codeBlockRegex.exec(content)) !== null) {
-        const [, language = 'text', codeContent] = codeMatch;
-        let fileName = 'index.html';
-        
-        if (language === 'css') fileName = 'style.css';
-        else if (language === 'javascript' || language === 'js') fileName = 'script.js';
-        else if (language === 'html') fileName = 'index.html';
-        
-        files.push({
-          path: fileName,
-          content: codeContent.trim(),
-          language: language.toLowerCase()
-        });
-        fileIndex++;
-      }
-    }
-    
     // Remove ALL file blocks and code blocks from content to get clean description
     let description = content
       .replace(/FILE:\s*[^\n\r]+[\n\r]+```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove FILE blocks
-      .replace(/```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove any remaining code blocks
+      .replace(/```[\s\S]*?```/g, '') // Remove any remaining code blocks
       .replace(/^\s*[\n\r]+/gm, '') // Remove empty lines at start
       .replace(/[\n\r]{3,}/g, '\n\n') // Reduce multiple newlines
       .trim();

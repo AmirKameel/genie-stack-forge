@@ -109,7 +109,7 @@ const ChatInterface = ({
       let cleanDescription = result.content;
       
       // Enhanced parsing to catch all file formats and clean description
-      const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
+      const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
       let match;
       const parsedFiles: GeneratedFile[] = [];
       
@@ -124,30 +124,6 @@ const ChatInterface = ({
         cleanDescription = cleanDescription.replace(fullMatch, '');
       }
       
-      // Fallback: try to catch code blocks without FILE: markers
-      if (parsedFiles.length === 0) {
-        const codeBlockRegex = /```(\w+)[\n\r]+([\s\S]*?)```/g;
-        let codeMatch;
-        
-        while ((codeMatch = codeBlockRegex.exec(result.content)) !== null) {
-          const [fullMatch, language = 'text', codeContent] = codeMatch;
-          let fileName = 'index.html';
-          
-          if (language === 'css') fileName = 'style.css';
-          else if (language === 'javascript' || language === 'js') fileName = 'script.js';
-          else if (language === 'html') fileName = 'index.html';
-          
-          parsedFiles.push({
-            path: fileName,
-            content: codeContent.trim(),
-            language: language.toLowerCase()
-          });
-          
-          // Remove the code block from the description
-          cleanDescription = cleanDescription.replace(fullMatch, '');
-        }
-      }
-      
       // Use parsed files if we found any, otherwise use files from AI service
       if (parsedFiles.length > 0) {
         files = parsedFiles;
@@ -157,8 +133,8 @@ const ChatInterface = ({
       
       // Clean up any remaining code blocks or file references from description
       cleanDescription = cleanDescription
-        .replace(/```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove any remaining code blocks
-        .replace(/FILE:\s*[^\n\r]+/g, '') // Remove any FILE: markers
+        .replace(/```[\s\S]*?```/g, '') // Remove any remaining code blocks
+        .replace(/FILE:\s*[^\n]+/g, '') // Remove any FILE: markers
         .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove excessive newlines
         .trim();
       
@@ -427,7 +403,7 @@ IMPORTANT: Only return the MODIFIED files that need changes. Do not regenerate u
       
       // Parse the edited files
       let editedFiles: GeneratedFile[] = [];
-      const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
+      const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
       let match;
       
       while ((match = fileRegex.exec(result.content)) !== null) {
@@ -439,47 +415,15 @@ IMPORTANT: Only return the MODIFIED files that need changes. Do not regenerate u
         });
       }
       
-      // Fallback parsing for code blocks without FILE: markers
-      if (editedFiles.length === 0) {
-        const codeBlockRegex = /```(\w+)[\n\r]+([\s\S]*?)```/g;
-        let codeMatch;
-        
-        while ((codeMatch = codeBlockRegex.exec(result.content)) !== null) {
-          const [, language = 'text', codeContent] = codeMatch;
-          let fileName = 'index.html';
-          
-          if (language === 'css') fileName = 'style.css';
-          else if (language === 'javascript' || language === 'js') fileName = 'script.js';
-          else if (language === 'html') fileName = 'index.html';
-          
-          editedFiles.push({
-            path: fileName,
-            content: codeContent.trim(),
-            language: language.toLowerCase()
-          });
-        }
-      }
-      
       // Update existing files with edits
       if (editedFiles.length > 0) {
-        const updatedFiles = appState.files.map(existingFile => {
-          const editedFile = editedFiles.find(ef => ef.path === existingFile.path);
-          return editedFile || existingFile;
-        });
-        
-        // Add any completely new files that don't exist yet
-        editedFiles.forEach(editedFile => {
-          if (!appState.files.find(f => f.path === editedFile.path)) {
-            updatedFiles.push(editedFile);
-          }
-        });
-        
         setAppState(prev => ({
           ...prev,
-          files: updatedFiles
+          files: prev.files.map(existingFile => {
+            const editedFile = editedFiles.find(ef => ef.path === existingFile.path);
+            return editedFile || existingFile;
+          })
         }));
-        
-        onFilesGenerated(updatedFiles);
         
         const assistantMessage: Message = {
           id: Date.now().toString(),
