@@ -37,12 +37,10 @@ export class AIService {
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
-2. NEVER include ANY code in the description - ALL CODE must be in separate files using the FILE format
+2. NEVER include code in the description - ALL CODE must be in separate files
 3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 4. Always create separate CSS files for styling, never inline styles in HTML (except for critical styles)
 5. Create separate JavaScript files for functionality when needed
-6. For multi-page websites, create ALL necessary files including shared CSS files
-7. NEVER put CSS code in the chat response - it must be in separate .css files
 
 IMPORTANT DESIGN GUIDELINES:
 1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
@@ -53,7 +51,7 @@ IMPORTANT DESIGN GUIDELINES:
 6. Use modern CSS features like flexbox, grid, and animations
 
 REQUIRED RESPONSE FORMAT:
-1. Start with a brief description of what you built (NO CODE WHATSOEVER)
+1. Start with a brief description of what you built (no code)
 2. Then generate ALL files using this EXACT format:
 
 FILE: filename.ext
@@ -61,7 +59,6 @@ FILE: filename.ext
 file content here
 \`\`\`
 
-CRITICAL: Every single piece of code must be inside a FILE block. Do not include any code outside of FILE blocks.
 EXAMPLE:
 FILE: index.html
 \`\`\`html
@@ -141,7 +138,7 @@ Generate a complete, functional web application for: ${prompt}`;
     const files: Array<{ path: string; content: string; language: string }> = [];
     
     // Enhanced regex to catch all file formats
-    const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]*```(\w+)?[\n\r]+([\s\S]*?)```/g;
+    const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
     let match;
     
     while ((match = fileRegex.exec(content)) !== null) {
@@ -155,19 +152,16 @@ Generate a complete, functional web application for: ${prompt}`;
     
     // Remove ALL file blocks and code blocks from content to get clean description
     let description = content
-      .replace(/FILE:\s*[^\n\r]+[\n\r]*```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove FILE blocks
+      .replace(/FILE:\s*[^\n\r]+[\n\r]+```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove FILE blocks
       .replace(/```[\s\S]*?```/g, '') // Remove any remaining code blocks
-      .replace(/###\s*/g, '') // Remove markdown headers
-      .replace(/\*\*\*/g, '') // Remove markdown separators
       .replace(/^\s*[\n\r]+/gm, '') // Remove empty lines at start
       .replace(/[\n\r]{3,}/g, '\n\n') // Reduce multiple newlines
-      .replace(/Generated Files?:?[\s\S]*$/i, '') // Remove "Generated Files" section
       .trim();
     
     // If description is too short or mostly technical, provide a better one
-    if (description.length < 30 || description.match(/^(Generated Files?:?|Here|The|###)/i)) {
+    if (description.length < 50 || description.match(/^(Generated Files?:?|Here|The)/i)) {
       description = files.length > 0 
-        ? `I've created a complete application with ${files.length} file${files.length > 1 ? 's' : ''} including all the requested features and professional styling.`
+        ? `I've generated ${files.length} file${files.length > 1 ? 's' : ''} for your application with all the requested features and styling.`
         : '';
     }
     

@@ -102,6 +102,9 @@ const AppGenerator = ({ initialPrompt, initialImage, onBack }: AppGeneratorProps
                 <div className="h-6 w-px bg-border" />
                 <div>
                   <h1 className="font-title font-semibold">{appState.currentProject.name}</h1>
+                  <p className="font-body text-sm text-muted-foreground">
+                    {appState.currentProject.description}
+                  </p>
                 </div>
               </>
             )}
