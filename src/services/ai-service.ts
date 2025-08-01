@@ -86,7 +86,7 @@ export class AIService {
       const data = await response.json();
       const content = data.candidates[0].content.parts[0].text;
       
-      return this.parseResponse(content);
+      return this.parseResponse(content, template, isSinglePage);
     } catch (error) {
       console.error('Gemini API error:', error);
       throw new Error('Failed to generate with Gemini API');
@@ -151,25 +151,24 @@ Generate a complete, functional single-page web application for: ${prompt}`;
   }
   
   private getMultiPageSystemPrompt(prompt: string, template: WebsiteTemplate): string {
-    const systemPrompt = `You are WebMeccano, an expert full-stack web developer. Generate complete, production-ready web applications based on user requirements.
+    return `You are WebMeccano, an expert full-stack web developer. Generate a complete, production-ready MULTI-PAGE web application based on the ${template.name} template.
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
 2. NEVER include code in the description - ALL CODE must be in separate files
 3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
-4. Always create separate CSS files for styling, never inline styles in HTML (except for critical styles)
+4. Always create separate CSS files for styling, never inline styles in HTML
 5. Create separate JavaScript files for functionality when needed
 
-MULTI-PAGE WEBSITE TEMPLATE: ${template.name}
-Template Description: ${template.description}
-Template Category: ${template.category}
+TEMPLATE: ${template.name}
+DESCRIPTION: ${template.description}
+CATEGORY: ${template.category}
 
 REQUIRED PAGES TO GENERATE:
-${template.pages.map(page => `- ${page.name} (${page.filename}): ${page.sections.join(', ')}`).join('\n')}
+${template.pages.map(page => `- ${page.name} (${page.filename}): Include sections for ${page.sections.join(', ')}`).join('\n')}
 
-SHARED STYLES TEMPLATE:
-Create a shared.css file with the following base structure and expand upon it:
-${template.sharedStyles}
+TEMPLATE FEATURES TO INCLUDE:
+${template.features.map(feature => `- ${feature}`).join('\n')}
 
 IMPORTANT DESIGN GUIDELINES:
 1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
@@ -181,7 +180,9 @@ IMPORTANT DESIGN GUIDELINES:
 
 MULTI-PAGE REQUIREMENTS:
 1. Create a consistent navigation header across all pages
-2. Generate a shared.css file for common styles
+2. Generate a shared.css file for common styles based on this template structure:
+${template.sharedStyles}
+
 3. Each page should have its own HTML file
 4. Include proper internal linking between pages
 5. Maintain consistent branding and design across all pages
@@ -206,7 +207,8 @@ FILE: index.html
 
 FILE: shared.css
 \`\`\`css
-body { ... }
+/* Based on ${template.name} template */
+${template.sharedStyles}
 \`\`\`
 
 FILE: about.html
@@ -222,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 \`\`\`
 
-Generate a complete, functional multi-page web application for: ${prompt}`;
+Generate a complete, functional ${template.name.toLowerCase()} for: ${prompt}`;
   }
 
   private async generateWithOpenAI(prompt: string, imageBase64?: string): Promise<AIResponse> {
@@ -235,7 +237,7 @@ Generate a complete, functional multi-page web application for: ${prompt}`;
     throw new Error('Claude provider not implemented yet');
   }
 
-  private parseResponse(content: string): AIResponse {
+  private parseResponse(content: string, template: WebsiteTemplate, isSinglePage: boolean): AIResponse {
     const files: Array<{ path: string; content: string; language: string }> = [];
     
     // Enhanced regex to catch all file formats
@@ -259,11 +261,23 @@ Generate a complete, functional multi-page web application for: ${prompt}`;
       .replace(/[\n\r]{3,}/g, '\n\n') // Reduce multiple newlines
       .trim();
     
-    // If description is too short or mostly technical, provide a better one
+    // Create a better description based on template
     if (description.length < 50 || description.match(/^(Generated Files?:?|Here|The)/i)) {
-      description = files.length > 0 
-        ? `I've generated ${files.length} file${files.length > 1 ? 's' : ''} for your application with all the requested features and styling.`
-        : '';
+      description = `I've generated a complete ${isSinglePage ? 'single-page' : 'multi-page'} ${template.name.toLowerCase()} based on your request!
+
+**Template Used:** ${template.name}
+**Category:** ${template.category}
+**Generated Files:** ${files.length} files
+
+**Features Included:**
+${template.features.map(feature => `- ${feature}`).join('\n')}
+
+**Pages Generated:**
+${isSinglePage ? '- Single responsive page with all sections' : template.pages.map(page => `- **${page.name}** (${page.filename}): ${page.sections.join(', ')}`).join('\n')}
+
+The application uses WebMeccano's signature colors (#34bfc2 blue and #F78D2B orange) with professional typography (Source Sans Pro for headings, IBM Plex Sans for body text). All files are properly structured with responsive design and modern styling.
+
+You can now view the live preview or edit the code. Ask me to make any changes you'd like!`;
     }
     
     return {

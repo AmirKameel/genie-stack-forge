@@ -291,7 +291,7 @@ You can now view the live preview or edit the code. Ask me to make any changes y
       onFilesGenerated(files);
       
       // Extract app name from prompt or use default
-      const appName = prompt.match(/(?:create|build|make)\s+(?:a|an)?\s*([^.]+)/i)?.[1]?.trim() || detectedTemplate.name;
+      const appName = prompt.match(/(?:create|build|make)\s+(?:a|an)?\s*([^.]+)/i)?.[1]?.trim() || "Book Store";
       
       onProjectUpdate({
         name: appName.charAt(0).toUpperCase() + appName.slice(1),
