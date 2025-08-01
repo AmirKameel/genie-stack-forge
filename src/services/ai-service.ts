@@ -99,24 +99,8 @@ export class AIService {
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
 2. NEVER include code in the description - ALL CODE must be in separate files
-3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
-4. Always create separate CSS files for styling, never inline styles in HTML (except for critical styles)
-5. Create separate JavaScript files for functionality when needed
-
-IMPORTANT DESIGN GUIDELINES:
-1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
-2. Use fonts: 'Source Sans Pro' for headings, 'IBM Plex Sans' for body text
-3. Create responsive, modern designs with proper CSS styling
-4. Include interactive elements and functionality
-5. Make apps visually appealing and professional
 6. Use modern CSS features like flexbox, grid, and animations
 
-SINGLE PAGE STRUCTURE:
-- Hero section with compelling headline
-- Features/benefits section
-- Testimonials or social proof
-- Call-to-action sections
-- Contact information
 - Footer
 
 REQUIRED RESPONSE FORMAT:
@@ -157,18 +141,6 @@ CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
 2. NEVER include code in the description - ALL CODE must be in separate files
 3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
-4. Always create separate CSS files for styling, never inline styles in HTML
-5. Create separate JavaScript files for functionality when needed
-
-TEMPLATE: ${template.name}
-DESCRIPTION: ${template.description}
-CATEGORY: ${template.category}
-
-REQUIRED PAGES TO GENERATE:
-${template.pages.map(page => `- ${page.name} (${page.filename}): Include sections for ${page.sections.join(', ')}`).join('\n')}
-
-TEMPLATE FEATURES TO INCLUDE:
-${template.features.map(feature => `- ${feature}`).join('\n')}
 
 IMPORTANT DESIGN GUIDELINES:
 1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)

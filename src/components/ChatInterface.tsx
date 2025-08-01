@@ -115,7 +115,7 @@ const ChatInterface = ({
       let cleanDescription = result.content;
       
       // Enhanced parsing to catch all file formats and clean description
-      const fileRegex = /FILE:\s*([^\n]+)\n```(\w+)?\n([\s\S]*?)```/g;
+      const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
       let match;
       const parsedFiles: GeneratedFile[] = [];
       
@@ -141,6 +141,7 @@ const ChatInterface = ({
       cleanDescription = cleanDescription
         .replace(/```[\s\S]*?```/g, '') // Remove any remaining code blocks
         .replace(/FILE:\s*[^\n]+/g, '') // Remove any FILE: markers
+        .replace(/Generated Files?:?[\s\S]*$/i, '') // Remove "Generated Files" sections
         .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove excessive newlines
         .trim();
       
@@ -153,52 +154,148 @@ const ChatInterface = ({
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generated App</title>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>WebMeccano Generated App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body { 
-            font-family: 'IBM Plex Sans', sans-serif; 
-            margin: 0; 
-            padding: 20px; 
-            background: linear-gradient(135deg, #34bfc2, #F78D2B);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        
         .container { 
-            max-width: 800px; 
+            max-width: 600px; 
             margin: 0 auto; 
-            background: white; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        
         h1 { 
             color: #34bfc2; 
-            font-family: 'Source Sans Pro', sans-serif;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-        .btn {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
             background: linear-gradient(135deg, #34bfc2, #F78D2B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #34bfc2 0%, #F78D2B 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-family: 'IBM Plex Sans', sans-serif;
-            font-weight: 500;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(52, 191, 194, 0.3);
         }
+        
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(52, 191, 194, 0.4);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .feature {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .feature i {
+            font-size: 2rem;
+            color: #34bfc2;
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Your Generated App</h1>
-        <p>This app was generated based on your prompt: "${prompt}"</p>
-        <button class="btn" onclick="alert('Hello from your WebMeccano generated app!')">Try it out!</button>
+        <h1><i class="fas fa-magic"></i> WebMeccano</h1>
+        <p>Your beautiful app has been generated! This is a modern, responsive application built with the latest web technologies.</p>
+        <button class="btn" onclick="showDemo()">
+            <i class="fas fa-rocket"></i> Explore Features
+        </button>
+        
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-mobile-alt"></i>
+                <div>Responsive</div>
+            </div>
+            <div class="feature">
+                <i class="fas fa-paint-brush"></i>
+                <div>Beautiful UI</div>
+            </div>
+            <div class="feature">
+                <i class="fas fa-bolt"></i>
+                <div>Fast & Modern</div>
+            </div>
+        </div>
     </div>
+    
+    <script>
+        function showDemo() {
+            alert('🎉 Welcome to your WebMeccano generated app!\\n\\n✨ Features:\\n• Modern design\\n• Responsive layout\\n• Beautiful animations\\n• WebMeccano branding');
+        }
+        
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.8s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
 </body>
 </html>`,
           language: "html"
