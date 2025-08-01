@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { GeneratedFile, AppState } from "./AppGenerator";
 import { AIService } from "@/services/ai-service";
 import { UnsplashService } from "@/services/unsplash-service";
+import { TemplateService } from "@/services/template-service";
 
 interface Message {
   id: string;
@@ -44,6 +45,7 @@ const ChatInterface = ({
   const [currentMessage, setCurrentMessage] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const templateService = new TemplateService();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,6 +103,10 @@ const ChatInterface = ({
       // Initialize Unsplash service
       const unsplashService = new UnsplashService("LJRrYs6fCK-tsxV_Xx6azh4UWidQVlEQsmpnRkQqrgg");
 
+      // Detect template and page type
+      const isSinglePage = templateService.isSinglePage(prompt);
+      const detectedTemplate = templateService.detectTemplateFromPrompt(prompt);
+      
       // Generate app content
       const result = await aiService.generateApp(prompt, imageBase64);
       
@@ -260,10 +266,14 @@ const ChatInterface = ({
       const assistantMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: cleanDescription || `I've generated your app based on your request! 
+        content: cleanDescription || `I've generated your ${isSinglePage ? 'single-page' : 'multi-page'} ${detectedTemplate.name.toLowerCase()} based on your request! 
 
 **Generated Files:**
 ${files.map(f => `- **${f.path}**: ${f.language.toUpperCase()} file`).join('\n')}
+
+**Template Used:** ${detectedTemplate.name}
+**Features included:**
+${detectedTemplate.features.map(feature => `- ${feature}`).join('\n')}
 
 **Features included:**
 - Responsive design with WebMeccano branding
@@ -281,7 +291,7 @@ You can now view the live preview or edit the code. Ask me to make any changes y
       onFilesGenerated(files);
       
       // Extract app name from prompt or use default
-      const appName = prompt.match(/(?:create|build|make)\s+(?:a|an)?\s*([^.]+)/i)?.[1]?.trim() || "Generated App";
+      const appName = prompt.match(/(?:create|build|make)\s+(?:a|an)?\s*([^.]+)/i)?.[1]?.trim() || detectedTemplate.name;
       
       onProjectUpdate({
         name: appName.charAt(0).toUpperCase() + appName.slice(1),
