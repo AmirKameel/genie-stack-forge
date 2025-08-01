@@ -43,8 +43,6 @@ CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 5. Create separate JavaScript files for functionality when needed
 6. For multi-page websites, create ALL necessary files including shared CSS files
 7. NEVER put CSS code in the chat response - it must be in separate .css files
-8. NEVER include any code snippets, CSS rules, or technical syntax in your description
-9. Keep your description brief and non-technical - just explain what you built
 
 IMPORTANT DESIGN GUIDELINES:
 1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
@@ -55,7 +53,7 @@ IMPORTANT DESIGN GUIDELINES:
 6. Use modern CSS features like flexbox, grid, and animations
 
 REQUIRED RESPONSE FORMAT:
-1. Start with a brief, simple description of what you built (NO CODE, NO TECHNICAL DETAILS, NO CSS)
+1. Start with a brief description of what you built (NO CODE WHATSOEVER)
 2. Then generate ALL files using this EXACT format:
 
 FILE: filename.ext
@@ -63,15 +61,8 @@ FILE: filename.ext
 file content here
 \`\`\`
 
-CRITICAL: 
-- Every single piece of code must be inside a FILE block
-- Do not include any code outside of FILE blocks
-- Do not include CSS rules, selectors, or any technical syntax in your description
-- Keep description simple and user-friendly
-
+CRITICAL: Every single piece of code must be inside a FILE block. Do not include any code outside of FILE blocks.
 EXAMPLE:
-Description: I've created a modern website with multiple pages and professional styling.
-
 FILE: index.html
 \`\`\`html
 <!DOCTYPE html>
@@ -162,27 +153,22 @@ Generate a complete, functional web application for: ${prompt}`;
       });
     }
     
-    // Remove ALL file blocks, code blocks, and any remaining code from content
+    // Remove ALL file blocks and code blocks from content to get clean description
     let description = content
       .replace(/FILE:\s*[^\n\r]+[\n\r]*```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove FILE blocks
       .replace(/```[\s\S]*?```/g, '') // Remove any remaining code blocks
-      .replace(/```[\w]*[\s\S]*?```/g, '') // Remove code blocks without closing
-      .replace(/```[\w]*[\s\S]*$/g, '') // Remove unclosed code blocks at end
       .replace(/###\s*/g, '') // Remove markdown headers
       .replace(/\*\*\*/g, '') // Remove markdown separators
       .replace(/^\s*[\n\r]+/gm, '') // Remove empty lines at start
       .replace(/[\n\r]{3,}/g, '\n\n') // Reduce multiple newlines
       .replace(/Generated Files?:?[\s\S]*$/i, '') // Remove "Generated Files" section
-      .replace(/\/\*[\s\S]*?\*\//g, '') // Remove CSS comments
-      .replace(/\{[\s\S]*?\}/g, '') // Remove CSS rule blocks
-      .replace(/[.#][\w-]+[\s\S]*?(?=\n|$)/g, '') // Remove CSS selectors
       .trim();
     
-    // If description is too short, mostly technical, or contains code remnants, provide a better one
-    if (description.length < 30 || description.match(/^(Generated Files?:?|Here|The|###|:root|body|html|\.|#)/i) || description.includes('{') || description.includes('}')) {
+    // If description is too short or mostly technical, provide a better one
+    if (description.length < 30 || description.match(/^(Generated Files?:?|Here|The|###)/i)) {
       description = files.length > 0 
         ? `I've created a complete application with ${files.length} file${files.length > 1 ? 's' : ''} including all the requested features and professional styling.`
-        : 'Application generated successfully.';
+        : '';
     }
     
     return {
