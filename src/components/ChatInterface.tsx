@@ -109,7 +109,7 @@ const ChatInterface = ({
       let cleanDescription = result.content;
       
       // Enhanced parsing to catch all file formats and clean description
-      const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
+      const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]*```(\w+)?[\n\r]+([\s\S]*?)```/g;
       let match;
       const parsedFiles: GeneratedFile[] = [];
       
@@ -124,28 +124,56 @@ const ChatInterface = ({
         cleanDescription = cleanDescription.replace(fullMatch, '');
       }
       
-      // Fallback: try to catch code blocks without FILE: markers
+      // Fallback: More aggressive parsing to catch code blocks without FILE: markers
       if (parsedFiles.length === 0) {
-        const codeBlockRegex = /```(\w+)[\n\r]+([\s\S]*?)```/g;
-        let codeMatch;
+        const patterns = [
+          // JavaScript patterns
+          /```(?:javascript|js)[\n\r]+([\s\S]*?)```/gi,
+          // CSS patterns  
+          /```css[\n\r]+([\s\S]*?)```/gi,
+          // HTML patterns
+          /```html[\n\r]+([\s\S]*?)```/gi,
+          // Generic code blocks
+          /```(\w+)[\n\r]+([\s\S]*?)```/gi
+        ];
         
-        while ((codeMatch = codeBlockRegex.exec(result.content)) !== null) {
-          const [fullMatch, language = 'text', codeContent] = codeMatch;
-          let fileName = 'index.html';
+        patterns.forEach((pattern, index) => {
+          let codeMatch;
+          pattern.lastIndex = 0; // Reset regex state
           
-          if (language === 'css') fileName = 'style.css';
-          else if (language === 'javascript' || language === 'js') fileName = 'script.js';
-          else if (language === 'html') fileName = 'index.html';
-          
-          parsedFiles.push({
-            path: fileName,
-            content: codeContent.trim(),
-            language: language.toLowerCase()
-          });
-          
-          // Remove the code block from the description
-          cleanDescription = cleanDescription.replace(fullMatch, '');
-        }
+          while ((codeMatch = pattern.exec(result.content)) !== null) {
+            let language, codeContent;
+            
+            if (index < 3) {
+              // Specific patterns (js, css, html)
+              [, codeContent] = codeMatch;
+              if (index === 0) language = 'javascript';
+              else if (index === 1) language = 'css';
+              else language = 'html';
+            } else {
+              // Generic pattern
+              [, language, codeContent] = codeMatch;
+            }
+            
+            let fileName = 'index.html';
+            if (language === 'css') fileName = 'style.css';
+            else if (language === 'javascript' || language === 'js') fileName = 'script.js';
+            else if (language === 'html') fileName = 'index.html';
+            
+            // Check if we already have this file type
+            const existingFile = parsedFiles.find(f => f.path === fileName);
+            if (!existingFile && codeContent.trim()) {
+              parsedFiles.push({
+                path: fileName,
+                content: codeContent.trim(),
+                language: language.toLowerCase()
+              });
+              
+              // Remove the code block from the description
+              cleanDescription = cleanDescription.replace(codeMatch[0], '');
+            }
+          }
+        });
       }
       
       // Use parsed files if we found any, otherwise use files from AI service
@@ -157,8 +185,11 @@ const ChatInterface = ({
       
       // Clean up any remaining code blocks or file references from description
       cleanDescription = cleanDescription
-        .replace(/```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove any remaining code blocks
+        .replace(/```[\w]*[\n\r]*[\s\S]*?```/g, '') // Remove any remaining code blocks
         .replace(/FILE:\s*[^\n\r]+/g, '') // Remove any FILE: markers
+        .replace(/Generated Files?:?\s*[\n\r]*/gi, '') // Remove "Generated Files:" text
+        .replace(/Here are the files[\s\S]*?:/gi, '') // Remove "Here are the files" text
+        .replace(/###\s*/g, '') // Remove ### markers
         .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove excessive newlines
         .trim();
       

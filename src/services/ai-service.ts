@@ -147,7 +147,7 @@ Generate a complete, functional web application for: ${prompt}`;
     const files: Array<{ path: string; content: string; language: string }> = [];
     
     // Enhanced regex to catch all file formats including edge cases
-    const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
+    const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]*```(\w+)?[\n\r]+([\s\S]*?)```/g;
     let match;
     
     while ((match = fileRegex.exec(content)) !== null) {
@@ -161,31 +161,60 @@ Generate a complete, functional web application for: ${prompt}`;
     
     // Also try to catch code blocks without FILE: markers (fallback parsing)
     if (files.length === 0) {
-      const codeBlockRegex = /```(\w+)[\n\r]+([\s\S]*?)```/g;
-      let codeMatch;
-      let fileIndex = 0;
+      const patterns = [
+        // JavaScript patterns - more specific first
+        /```(?:javascript|js)[\n\r]+([\s\S]*?)```/gi,
+        // CSS patterns  
+        /```css[\n\r]+([\s\S]*?)```/gi,
+        // HTML patterns
+        /```html[\n\r]+([\s\S]*?)```/gi,
+        // Generic code blocks (less specific)
+        /```(\w+)[\n\r]+([\s\S]*?)```/gi
+      ];
       
-      while ((codeMatch = codeBlockRegex.exec(content)) !== null) {
-        const [, language = 'text', codeContent] = codeMatch;
-        let fileName = 'index.html';
+      patterns.forEach((pattern, index) => {
+        let codeMatch;
+        pattern.lastIndex = 0; // Reset regex state
         
-        if (language === 'css') fileName = 'style.css';
-        else if (language === 'javascript' || language === 'js') fileName = 'script.js';
-        else if (language === 'html') fileName = 'index.html';
-        
-        files.push({
-          path: fileName,
-          content: codeContent.trim(),
-          language: language.toLowerCase()
-        });
-        fileIndex++;
-      }
+        while ((codeMatch = pattern.exec(content)) !== null) {
+          let language, codeContent;
+          
+          if (index < 3) {
+            // Specific patterns (js, css, html)
+            [, codeContent] = codeMatch;
+            if (index === 0) language = 'javascript';
+            else if (index === 1) language = 'css';
+            else language = 'html';
+          } else {
+            // Generic pattern
+            [, language, codeContent] = codeMatch;
+          }
+          
+          let fileName = 'index.html';
+          if (language === 'css') fileName = 'style.css';
+          else if (language === 'javascript' || language === 'js') fileName = 'script.js';
+          else if (language === 'html') fileName = 'index.html';
+          
+          // Check if we already have this file type
+          const existingFile = files.find(f => f.path === fileName);
+          if (!existingFile && codeContent.trim()) {
+            files.push({
+              path: fileName,
+              content: codeContent.trim(),
+              language: language.toLowerCase()
+            });
+          }
+        }
+      });
     }
     
     // Remove ALL file blocks and code blocks from content to get clean description
     let description = content
-      .replace(/FILE:\s*[^\n\r]+[\n\r]+```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove FILE blocks
-      .replace(/```[\w]*[\n\r]+[\s\S]*?```/g, '') // Remove any remaining code blocks
+      .replace(/FILE:\s*[^\n\r]+[\n\r]*```[\w]*[\n\r]*[\s\S]*?```/g, '') // Remove FILE blocks
+      .replace(/```[\w]*[\n\r]*[\s\S]*?```/g, '') // Remove any remaining code blocks
+      .replace(/Generated Files?:?\s*[\n\r]*/gi, '') // Remove "Generated Files:" text
+      .replace(/Here are the files[\s\S]*?:/gi, '') // Remove "Here are the files" text
+      .replace(/###\s*/g, '') // Remove ### markers
       .replace(/^\s*[\n\r]+/gm, '') // Remove empty lines at start
       .replace(/[\n\r]{3,}/g, '\n\n') // Reduce multiple newlines
       .trim();
