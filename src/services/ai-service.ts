@@ -273,17 +273,46 @@ Generate a complete, stunning ${template.name.toLowerCase()} for: ${prompt}`;
   private parseResponse(content: string, template: WebsiteTemplate, isSinglePage: boolean): AIResponse {
     const files: Array<{ path: string; content: string; language: string }> = [];
     
-    // Enhanced regex to catch all file formats
-    const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)```/g;
+    // Enhanced regex to catch all file formats - handles both single and multiple backticks
+    const fileRegex = /FILE:\s*([^\n\r]+)[\n\r]+```(\w+)?[\n\r]+([\s\S]*?)(?=```[\s\S]*?(?:FILE:|$)|$)/g;
     let match;
     
     while ((match = fileRegex.exec(content)) !== null) {
-      const [fullMatch, path, language = 'text', fileContent] = match;
-      files.push({
-        path: path.trim(),
-        content: fileContent.trim(),
-        language: language.toLowerCase()
-      });
+      const [fullMatch, path, language = 'html', fileContent] = match;
+      
+      // Clean up the file content by removing trailing backticks and whitespace
+      let cleanContent = fileContent.replace(/```\s*$/, '').trim();
+      
+      // Only add non-empty files
+      if (cleanContent && path) {
+        files.push({
+          path: path.trim(),
+          content: cleanContent,
+          language: language.toLowerCase() || 'html'
+        });
+      }
+    }
+    
+    // If no files found with the enhanced regex, try a simpler approach
+    if (files.length === 0) {
+      const simpleFileRegex = /```html\s*([\s\S]*?)```/g;
+      let htmlMatch;
+      let fileIndex = 0;
+      
+      while ((htmlMatch = simpleFileRegex.exec(content)) !== null) {
+        const [fullMatch, fileContent] = htmlMatch;
+        const fileName = fileIndex === 0 ? 'index.html' : 
+                        fileIndex === 1 ? 'about.html' : 
+                        fileIndex === 2 ? 'contact.html' : 
+                        `page${fileIndex + 1}.html`;
+        
+        files.push({
+          path: fileName,
+          content: fileContent.trim(),
+          language: 'html'
+        });
+        fileIndex++;
+      }
     }
     
     // Remove ALL file blocks and code blocks from content to get clean description
@@ -295,22 +324,20 @@ Generate a complete, stunning ${template.name.toLowerCase()} for: ${prompt}`;
       .trim();
     
     // Create a better description based on template
-    if (description.length < 50 || description.match(/^(Generated Files?:?|Here|The)/i)) {
-      description = `I've generated a complete ${isSinglePage ? 'single-page' : 'multi-page'} ${template.name.toLowerCase()} based on your request!
+    if (description.length < 50 || description.match(/^(Generated Files?:?|Here|The)/i) || files.length === 0) {
+      description = `I've generated a complete ${isSinglePage ? 'single-page' : 'multi-page'} website based on your request!
 
-**Template Used:** ${template.name}
-**Category:** ${template.category}
 **Generated Files:** ${files.length} files
+**Template Type:** ${isSinglePage ? 'Single Page Application' : 'Multi-Page Website'}
 
 **Features Included:**
-${template.features.map(feature => `- ${feature}`).join('\n')}
+- Modern responsive design with Tailwind CSS
+- Beautiful animations and hover effects  
+- Mobile-responsive navigation
+- Professional layout and typography
+- Interactive elements and smooth scrolling
 
-**Pages Generated:**
-${isSinglePage ? '- Single responsive page with all sections' : template.pages.map(page => `- **${page.name}** (${page.filename}): ${page.sections.join(', ')}`).join('\n')}
-
-The application uses WebMeccano's signature colors (#34bfc2 blue and #F78D2B orange) with professional typography (Source Sans Pro for headings, IBM Plex Sans for body text). All files are properly structured with responsive design and modern styling.
-
-You can now view the live preview or edit the code. Ask me to make any changes you'd like!`;
+The website uses modern web technologies with inline styling and JavaScript for optimal performance. You can now view the live preview or edit the code as needed!`;
     }
     
     return {
