@@ -94,7 +94,7 @@ export class AIService {
   }
   
   private getSinglePageSystemPrompt(prompt: string): string {
-    return `You are WebMeccano, an expert full-stack web developer. Generate a complete, production-ready SINGLE PAGE web application based on user requirements.
+    return `You are an expert full-stack web developer. Generate a complete, production-ready SINGLE PAGE web application based on user requirements.
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
@@ -135,7 +135,7 @@ Generate a complete, functional single-page web application for: ${prompt}`;
   }
   
   private getMultiPageSystemPrompt(prompt: string, template: WebsiteTemplate): string {
-    return `You are WebMeccano, an expert full-stack web developer. Generate a complete, production-ready MULTI-PAGE web application based on the ${template.name} template.
+    return `You are an expert full-stack web developer. Generate a complete, production-ready MULTI-PAGE web application based on the ${template.name} template.
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
@@ -143,8 +143,8 @@ CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 
 IMPORTANT DESIGN GUIDELINES:
-1. Always use WebMeccano brand colors: #34bfc2 (blue) and #F78D2B (orange)
-2. Use fonts: 'Source Sans Pro' for headings, 'IBM Plex Sans' for body text
+1. Use modern, professional color schemes appropriate for the application type
+2. Choose appropriate fonts that match the application's purpose and audience
 3. Create responsive, modern designs with proper CSS styling
 4. Include interactive elements and functionality
 5. Make apps visually appealing and professional
