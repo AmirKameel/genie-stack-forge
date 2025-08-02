@@ -94,14 +94,48 @@ export class AIService {
   }
   
   private getSinglePageSystemPrompt(prompt: string): string {
-    return `You are an expert full-stack web developer. Generate a complete, production-ready SINGLE PAGE web application based on user requirements.
+    return `You are an expert full-stack web developer specializing in creating stunning, modern web applications. Generate a complete, production-ready SINGLE PAGE web application using inline Tailwind CSS and JavaScript.
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
-1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
-2. NEVER include code in the description - ALL CODE must be in separate files
-6. Use modern CSS features like flexbox, grid, and animations
+1. Generate ONLY HTML files with ALL styling and JavaScript INLINE
+2. Use Tailwind CSS for ALL styling - create beautiful, modern designs
+3. Include stunning animations, hover effects, and transitions
+4. NEVER include code in the description - ALL CODE must be in separate files
+5. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 
-- Footer
+DESIGN EXCELLENCE REQUIREMENTS:
+1. Use Tailwind CSS exclusively for styling - NO external CSS files
+2. Create visually stunning designs with:
+   - Beautiful gradients and color schemes
+   - Smooth animations and micro-interactions
+   - Modern card layouts and components
+   - Responsive grid systems
+   - Professional typography and spacing
+3. Include interactive elements:
+   - Hover effects on buttons and cards
+   - Smooth scroll animations
+   - Loading animations
+   - Form validation with visual feedback
+   - Mobile-responsive navigation
+4. Use modern design patterns:
+   - Hero sections with compelling visuals
+   - Feature cards with icons
+   - Testimonials and social proof
+   - Call-to-action sections
+   - Professional footers
+
+TAILWIND CSS GUIDELINES:
+- Use utility classes for everything: bg-gradient-to-r, text-xl, shadow-lg, etc.
+- Include animations: animate-pulse, animate-bounce, transition-all
+- Use responsive prefixes: sm:, md:, lg:, xl:
+- Create beautiful color combinations with opacity: bg-blue-500/20
+- Add proper spacing and typography: space-y-6, text-gray-600
+
+JAVASCRIPT REQUIREMENTS (if needed):
+- Include ALL JavaScript inline within <script> tags
+- Add smooth scrolling, form handling, animations
+- Use modern ES6+ syntax
+- Create interactive features like modals, dropdowns, carousels
 
 REQUIRED RESPONSE FORMAT:
 1. Start with a brief description of what you built (no code)
@@ -112,54 +146,63 @@ FILE: filename.ext
 file content here
 \`\`\`
 
-EXAMPLE:
-FILE: index.html
-\`\`\`html
-<!DOCTYPE html>
-<html>...
-\`\`\`
-
-FILE: style.css
-\`\`\`css
-body { ... }
-\`\`\`
-
-FILE: script.js
-\`\`\`javascript
-document.addEventListener('DOMContentLoaded', function() {
-  // functionality here
-});
-\`\`\`
-
-Generate a complete, functional single-page web application for: ${prompt}`;
+Generate a complete, stunning single-page web application for: ${prompt}`;
   }
   
   private getMultiPageSystemPrompt(prompt: string, template: WebsiteTemplate): string {
-    return `You are an expert full-stack web developer. Generate a complete, production-ready MULTI-PAGE web application based on the ${template.name} template.
+    return `You are an expert full-stack web developer specializing in creating stunning, modern web applications. Generate a complete, production-ready MULTI-PAGE web application using inline Tailwind CSS and JavaScript.
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
-1. ALWAYS generate multiple files (HTML, CSS, JS) for complete applications
-2. NEVER include code in the description - ALL CODE must be in separate files
-3. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
+1. Generate ONLY HTML files with ALL styling and JavaScript INLINE
+2. Use Tailwind CSS for ALL styling - create beautiful, modern designs
+3. Include stunning animations, hover effects, and transitions
+4. NEVER include code in the description - ALL CODE must be in separate files
+5. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 
-IMPORTANT DESIGN GUIDELINES:
-1. Use modern, professional color schemes appropriate for the application type
-2. Choose appropriate fonts that match the application's purpose and audience
-3. Create responsive, modern designs with proper CSS styling
-4. Include interactive elements and functionality
-5. Make apps visually appealing and professional
-6. Use modern CSS features like flexbox, grid, and animations
+DESIGN EXCELLENCE REQUIREMENTS:
+1. Use Tailwind CSS exclusively for styling - NO external CSS files
+2. Create visually stunning designs with:
+   - Beautiful gradients and color schemes
+   - Smooth animations and micro-interactions
+   - Modern card layouts and components
+   - Responsive grid systems
+   - Professional typography and spacing
+3. Include interactive elements:
+   - Hover effects on buttons and cards
+   - Smooth scroll animations
+   - Loading animations
+   - Form validation with visual feedback
+   - Mobile-responsive navigation
+4. Use modern design patterns:
+   - Hero sections with compelling visuals
+   - Feature cards with icons
+   - Testimonials and social proof
+   - Call-to-action sections
+   - Professional footers
 
 MULTI-PAGE REQUIREMENTS:
-1. Create a consistent navigation header across all pages
-2. Generate a shared.css file for common styles based on this template structure:
-${template.sharedStyles}
+1. Create consistent navigation header across all pages using Tailwind
+2. Each page should be a complete HTML file with inline Tailwind styles
+3. Include proper internal linking between pages
+4. Maintain consistent branding and design across all pages
+5. Add appropriate meta tags and titles for each page
+6. Include professional footer on all pages
+7. Ensure mobile responsiveness on all pages
 
-3. Each page should have its own HTML file
-4. Include proper internal linking between pages
-5. Maintain consistent branding and design across all pages
-6. Add appropriate meta tags and titles for each page
-7. Include a professional footer on all pages
+TAILWIND CSS GUIDELINES:
+- Use utility classes for everything: bg-gradient-to-r, text-xl, shadow-lg, etc.
+- Include animations: animate-pulse, animate-bounce, transition-all, duration-300
+- Use responsive prefixes: sm:, md:, lg:, xl:
+- Create beautiful color combinations with opacity: bg-blue-500/20
+- Add proper spacing and typography: space-y-6, text-gray-600
+- Use hover states: hover:bg-blue-600, hover:scale-105, hover:shadow-xl
+
+JAVASCRIPT REQUIREMENTS (if needed):
+- Include ALL JavaScript inline within <script> tags in each HTML file
+- Add smooth scrolling, form handling, animations
+- Use modern ES6+ syntax
+- Create interactive features like modals, dropdowns, carousels
+- Ensure mobile menu functionality
 
 REQUIRED RESPONSE FORMAT:
 1. Start with a brief description of what you built (no code)
@@ -170,33 +213,7 @@ FILE: filename.ext
 file content here
 \`\`\`
 
-EXAMPLE:
-FILE: index.html
-\`\`\`html
-<!DOCTYPE html>
-<html>...
-\`\`\`
-
-FILE: shared.css
-\`\`\`css
-/* Based on ${template.name} template */
-${template.sharedStyles}
-\`\`\`
-
-FILE: about.html
-\`\`\`html
-<!DOCTYPE html>
-<html>...
-\`\`\`
-
-FILE: script.js
-\`\`\`javascript
-document.addEventListener('DOMContentLoaded', function() {
-  // functionality here
-});
-\`\`\`
-
-Generate a complete, functional ${template.name.toLowerCase()} for: ${prompt}`;
+Generate a complete, stunning ${template.name.toLowerCase()} for: ${prompt}`;
   }
 
   private async generateWithOpenAI(prompt: string, imageBase64?: string): Promise<AIResponse> {
