@@ -98,52 +98,75 @@ export class AIService {
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. Generate ONLY HTML files with ALL styling and JavaScript INLINE
-2. Use Tailwind CSS for ALL styling - create beautiful, modern designs
+2. Use Tailwind CSS CDN for ALL styling - create beautiful, modern designs
 3. Include stunning animations, hover effects, and transitions
 4. NEVER include code in the description - ALL CODE must be in separate files
 5. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 
 DESIGN EXCELLENCE REQUIREMENTS:
-1. Use Tailwind CSS exclusively for styling - NO external CSS files
+1. ALWAYS include Tailwind CSS CDN in the HTML head: <script src="https://cdn.tailwindcss.com"></script>
 2. Create visually stunning designs with:
-   - Beautiful gradients and color schemes
-   - Smooth animations and micro-interactions
-   - Modern card layouts and components
-   - Responsive grid systems
-   - Professional typography and spacing
+   - Beautiful gradients: bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600
+   - Smooth animations and micro-interactions: hover:scale-105 transition-all duration-300
+   - Modern card layouts with shadows: bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl
+   - Responsive grid systems: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+   - Professional typography: font-bold text-4xl md:text-6xl tracking-tight
 3. Include interactive elements:
-   - Hover effects on buttons and cards
-   - Smooth scroll animations
-   - Loading animations
+   - Hover effects: hover:bg-gradient-to-r hover:from-indigo-500 hover:to-purple-600
+   - Smooth scroll animations: scroll-smooth
+   - Loading animations: animate-pulse, animate-bounce, animate-spin
    - Form validation with visual feedback
-   - Mobile-responsive navigation
+   - Mobile-responsive navigation with hamburger menu
 4. Use modern design patterns:
-   - Hero sections with compelling visuals
-   - Feature cards with icons
-   - Testimonials and social proof
-   - Call-to-action sections
-   - Professional footers
+   - Hero sections with full-screen backgrounds and gradients
+   - Feature cards with icons and hover effects
+   - Testimonials with profile images
+   - Call-to-action sections with gradient buttons
+   - Professional footers with social links
+
+REQUIRED HTML STRUCTURE:
+- Always include: <!DOCTYPE html>, proper meta tags, and viewport
+- Include Google Fonts for typography: <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+- Use semantic HTML5 elements: header, nav, main, section, footer
+- Ensure mobile-first responsive design
 
 TAILWIND CSS GUIDELINES:
-- Use utility classes for everything: bg-gradient-to-r, text-xl, shadow-lg, etc.
-- Include animations: animate-pulse, animate-bounce, transition-all
-- Use responsive prefixes: sm:, md:, lg:, xl:
-- Create beautiful color combinations with opacity: bg-blue-500/20
-- Add proper spacing and typography: space-y-6, text-gray-600
+- Use utility classes for everything: bg-gradient-to-r, text-xl, shadow-lg
+- Include animations: animate-pulse, animate-bounce, transition-all duration-300
+- Use responsive prefixes: sm:, md:, lg:, xl:, 2xl:
+- Create beautiful color combinations: bg-slate-900, text-white, bg-white/10
+- Add proper spacing: space-y-8, px-6, py-12, mx-auto
+- Use backdrop blur effects: backdrop-blur-lg, backdrop-blur-sm
 
 JAVASCRIPT REQUIREMENTS (if needed):
-- Include ALL JavaScript inline within <script> tags
-- Add smooth scrolling, form handling, animations
-- Use modern ES6+ syntax
+- Include ALL JavaScript inline within <script> tags at bottom of body
+- Add smooth scrolling, form handling, mobile menu toggles
+- Use modern ES6+ syntax with const/let
 - Create interactive features like modals, dropdowns, carousels
+- Add scroll animations and intersection observers
 
 REQUIRED RESPONSE FORMAT:
 1. Start with a brief description of what you built (no code)
 2. Then generate ALL files using this EXACT format:
 
-FILE: filename.ext
-\`\`\`language
-file content here
+FILE: index.html
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Website Title</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <!-- Your beautiful website content here -->
+</body>
+</html>
 \`\`\`
 
 Generate a complete, stunning single-page web application for: ${prompt}`;
@@ -154,35 +177,41 @@ Generate a complete, stunning single-page web application for: ${prompt}`;
 
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
 1. Generate ONLY HTML files with ALL styling and JavaScript INLINE
-2. Use Tailwind CSS for ALL styling - create beautiful, modern designs
+2. Use Tailwind CSS CDN for ALL styling - create beautiful, modern designs
 3. Include stunning animations, hover effects, and transitions
 4. NEVER include code in the description - ALL CODE must be in separate files
 5. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 
 DESIGN EXCELLENCE REQUIREMENTS:
-1. Use Tailwind CSS exclusively for styling - NO external CSS files
+1. ALWAYS include Tailwind CSS CDN in every HTML head: <script src="https://cdn.tailwindcss.com"></script>
 2. Create visually stunning designs with:
-   - Beautiful gradients and color schemes
-   - Smooth animations and micro-interactions
-   - Modern card layouts and components
-   - Responsive grid systems
-   - Professional typography and spacing
+   - Beautiful gradients: bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600
+   - Smooth animations and micro-interactions: hover:scale-105 transition-all duration-300
+   - Modern card layouts with shadows: bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl
+   - Responsive grid systems: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+   - Professional typography: font-bold text-4xl md:text-6xl tracking-tight
 3. Include interactive elements:
-   - Hover effects on buttons and cards
-   - Smooth scroll animations
-   - Loading animations
+   - Hover effects: hover:bg-gradient-to-r hover:from-indigo-500 hover:to-purple-600
+   - Smooth scroll animations: scroll-smooth
+   - Loading animations: animate-pulse, animate-bounce, animate-spin
    - Form validation with visual feedback
-   - Mobile-responsive navigation
+   - Mobile-responsive navigation with hamburger menu
 4. Use modern design patterns:
-   - Hero sections with compelling visuals
-   - Feature cards with icons
-   - Testimonials and social proof
-   - Call-to-action sections
-   - Professional footers
+   - Hero sections with full-screen backgrounds and gradients
+   - Feature cards with icons and hover effects
+   - Testimonials with profile images
+   - Call-to-action sections with gradient buttons
+   - Professional footers with social links
+
+REQUIRED HTML STRUCTURE FOR EACH PAGE:
+- Always include: <!DOCTYPE html>, proper meta tags, and viewport
+- Include Google Fonts for typography: <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+- Use semantic HTML5 elements: header, nav, main, section, footer
+- Ensure mobile-first responsive design
 
 MULTI-PAGE REQUIREMENTS:
 1. Create consistent navigation header across all pages using Tailwind
-2. Each page should be a complete HTML file with inline Tailwind styles
+2. Each page should be a complete HTML file with Tailwind CDN included
 3. Include proper internal linking between pages
 4. Maintain consistent branding and design across all pages
 5. Add appropriate meta tags and titles for each page
@@ -190,27 +219,42 @@ MULTI-PAGE REQUIREMENTS:
 7. Ensure mobile responsiveness on all pages
 
 TAILWIND CSS GUIDELINES:
-- Use utility classes for everything: bg-gradient-to-r, text-xl, shadow-lg, etc.
-- Include animations: animate-pulse, animate-bounce, transition-all, duration-300
-- Use responsive prefixes: sm:, md:, lg:, xl:
-- Create beautiful color combinations with opacity: bg-blue-500/20
-- Add proper spacing and typography: space-y-6, text-gray-600
-- Use hover states: hover:bg-blue-600, hover:scale-105, hover:shadow-xl
+- Use utility classes for everything: bg-gradient-to-r, text-xl, shadow-lg
+- Include animations: animate-pulse, animate-bounce, transition-all duration-300
+- Use responsive prefixes: sm:, md:, lg:, xl:, 2xl:
+- Create beautiful color combinations: bg-slate-900, text-white, bg-white/10
+- Add proper spacing: space-y-8, px-6, py-12, mx-auto
+- Use backdrop blur effects: backdrop-blur-lg, backdrop-blur-sm
 
 JAVASCRIPT REQUIREMENTS (if needed):
-- Include ALL JavaScript inline within <script> tags in each HTML file
-- Add smooth scrolling, form handling, animations
-- Use modern ES6+ syntax
+- Include ALL JavaScript inline within <script> tags at bottom of each HTML body
+- Add smooth scrolling, form handling, mobile menu toggles
+- Use modern ES6+ syntax with const/let
 - Create interactive features like modals, dropdowns, carousels
-- Ensure mobile menu functionality
+- Add scroll animations and intersection observers
 
 REQUIRED RESPONSE FORMAT:
 1. Start with a brief description of what you built (no code)
 2. Then generate ALL files using this EXACT format:
 
-FILE: filename.ext
-\`\`\`language
-file content here
+FILE: index.html
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Title</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <!-- Your beautiful website content here -->
+</body>
+</html>
 \`\`\`
 
 Generate a complete, stunning ${template.name.toLowerCase()} for: ${prompt}`;
