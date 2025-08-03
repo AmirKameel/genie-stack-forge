@@ -198,28 +198,9 @@ Continue and complete the response:`;
 
     // Check for incomplete code blocks
     const codeBlockCount = (content.match(/```/g) || []).length;
-    if (codeBlockCount % 2 !== 0) {
-      return true;
-    }
-
     return false;
-  }
-  
-  private getSinglePageSystemPrompt(prompt: string): string {
-    return `You are an expert full-stack web developer specializing in creating stunning, modern web applications. Generate a complete, production-ready SINGLE PAGE web application using inline CSS and JavaScript.
-
 CRITICAL INSTRUCTIONS FOR FILE GENERATION:
-1. Generate ONLY HTML files with ALL styling and JavaScript INLINE - NO separate CSS/JS files
-2. Create beautiful, modern designs with inline CSS in <style> tags
-3. Include stunning animations, hover effects, and transitions
-4. NEVER include ANY code in the description - ALL CODE must be in files only
-5. Use EXACT file marking format: "FILE: filename.ext" followed by triple backticks with language
 6. ALWAYS complete ALL code - never leave anything unfinished
-7. Ensure all HTML tags are properly closed and all code is complete
-
-DESIGN EXCELLENCE REQUIREMENTS:
-1. Create visually stunning designs with inline CSS in <style> tags
-2. Use modern CSS features:
    - Beautiful gradients: background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)
    - Smooth animations: transition: all 0.3s ease
    - Modern layouts: display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))
@@ -317,8 +298,6 @@ DESIGN EXCELLENCE REQUIREMENTS:
    - Professional typography: font-bold text-4xl md:text-6xl tracking-tight
 3. Include interactive elements:
    - Hover effects: hover:bg-gradient-to-r hover:from-indigo-500 hover:to-purple-600
-   - Smooth scroll animations: scroll-smooth
-   - Loading animations: animate-pulse, animate-bounce, animate-spin
    - Form validation with visual feedback
    - Mobile-responsive navigation with hamburger menu
 4. Use modern design patterns:
@@ -326,21 +305,11 @@ DESIGN EXCELLENCE REQUIREMENTS:
    - Feature cards with icons and hover effects
    - Testimonials with profile images
    - Call-to-action sections with gradient buttons
-   - Professional footers with social links
-
 REQUIRED HTML STRUCTURE FOR EACH PAGE:
-- Always include: <!DOCTYPE html>, proper meta tags, and viewport
-- Include Google Fonts for typography: <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-- Use semantic HTML5 elements: header, nav, main, section, footer
-- Ensure mobile-first responsive design
-
 MULTI-PAGE REQUIREMENTS:
 1. Create consistent navigation header across all pages using Tailwind
 2. Each page should be a complete HTML file with Tailwind CDN included
 3. Include proper internal linking between pages
-4. Maintain consistent branding and design across all pages
-5. Add appropriate meta tags and titles for each page
-6. Include professional footer on all pages
 7. Ensure mobile responsiveness on all pages
 
 TAILWIND CSS GUIDELINES:
@@ -349,19 +318,10 @@ TAILWIND CSS GUIDELINES:
 - Use responsive prefixes: sm:, md:, lg:, xl:, 2xl:
 - Create beautiful color combinations: bg-slate-900, text-white, bg-white/10
 - Add proper spacing: space-y-8, px-6, py-12, mx-auto
-- Use backdrop blur effects: backdrop-blur-lg, backdrop-blur-sm
-
-JAVASCRIPT REQUIREMENTS (if needed):
-- Include ALL JavaScript inline within <script> tags at bottom of each HTML body
-- Add smooth scrolling, form handling, mobile menu toggles
-- Use modern ES6+ syntax with const/let
 - Create interactive features like modals, dropdowns, carousels
 - Add scroll animations and intersection observers
 
 REQUIRED RESPONSE FORMAT:
-1. Start with a brief description of what you built (no code)
-2. Then generate ALL files using this EXACT format:
-
 FILE: index.html
 \`\`\`html
 <!DOCTYPE html>
