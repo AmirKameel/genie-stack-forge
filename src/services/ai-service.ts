@@ -103,6 +103,82 @@ export class AIService {
     }
   }
 
+  private getSinglePageSystemPrompt(prompt: string): string {
+    return `You are an expert full-stack web developer specializing in creating stunning, modern web applications. Generate a complete, production-ready SINGLE-PAGE web application with ALL styling and JavaScript INLINE.
+
+CRITICAL REQUIREMENTS:
+1. Generate ONLY ONE HTML file with ALL CSS and JavaScript INLINE
+2. Use EXACT WebMeccano colors: #34bfc2 (blue) and #F78D2B (orange)
+3. Use Source Sans Pro for headings and IBM Plex Sans for body text
+4. Create beautiful, modern UI with proper spacing and layout
+5. Include responsive design that works on all devices
+6. Add smooth animations and hover effects
+7. Use proper image sizing: width: 100%; height: auto; object-fit: cover;
+8. Ensure clean, professional layout with proper containers
+
+HTML STRUCTURE REQUIREMENTS:
+- Include Google Fonts links for Source Sans Pro and IBM Plex Sans
+- Use semantic HTML5 elements
+- Add proper meta tags and viewport
+- Include all CSS in <style> tags in the head
+- Include all JavaScript in <script> tags before closing body
+- Use CSS Grid and Flexbox for layouts
+- Add proper spacing with padding and margins
+- Use box-sizing: border-box for all elements
+
+DESIGN REQUIREMENTS:
+- Modern, clean design with WebMeccano branding
+- Proper color scheme using ONLY #34bfc2 and #F78D2B
+- Beautiful typography hierarchy
+- Responsive images with proper aspect ratios
+- Smooth transitions and hover effects
+- Professional spacing and alignment
+- Mobile-first responsive design
+
+Generate a stunning single-page website for: ${prompt}`;
+  }
+
+  private getMultiPageSystemPrompt(prompt: string, template: WebsiteTemplate): string {
+    return `You are an expert full-stack web developer specializing in creating stunning, modern web applications. Generate a complete, production-ready MULTI-PAGE web application with ALL styling and JavaScript INLINE in each HTML file.
+
+CRITICAL REQUIREMENTS:
+1. Generate multiple HTML files, each with ALL CSS and JavaScript INLINE
+2. Use EXACT WebMeccano colors: #34bfc2 (blue) and #F78D2B (orange)
+3. Use Source Sans Pro for headings and IBM Plex Sans for body text
+4. Create beautiful, modern UI with proper spacing and layout
+5. Include responsive design that works on all devices
+6. Add smooth animations and hover effects
+7. Use proper image sizing: width: 100%; height: auto; object-fit: cover;
+8. Ensure clean, professional layout with proper containers
+9. Create consistent navigation across all pages
+
+TEMPLATE: ${template.name}
+REQUIRED PAGES: ${template.pages.map(p => p.filename).join(', ')}
+
+HTML STRUCTURE REQUIREMENTS (for each file):
+- Include Google Fonts links for Source Sans Pro and IBM Plex Sans
+- Use semantic HTML5 elements
+- Add proper meta tags and viewport
+- Include all CSS in <style> tags in the head
+- Include all JavaScript in <script> tags before closing body
+- Use CSS Grid and Flexbox for layouts
+- Add proper spacing with padding and margins
+- Use box-sizing: border-box for all elements
+- Include consistent navigation with proper links
+
+DESIGN REQUIREMENTS:
+- Modern, clean design with WebMeccano branding
+- Proper color scheme using ONLY #34bfc2 and #F78D2B
+- Beautiful typography hierarchy
+- Responsive images with proper aspect ratios
+- Smooth transitions and hover effects
+- Professional spacing and alignment
+- Mobile-first responsive design
+- Consistent header/footer across pages
+
+Generate a stunning multi-page ${template.name.toLowerCase()} for: ${prompt}`;
+  }
+
   private async ensureCompleteResponse(initialContent: string, prompt: string, isSinglePage: boolean, template: WebsiteTemplate): Promise<string> {
     // Check if the response seems incomplete
     if (this.isResponseIncomplete(initialContent)) {
